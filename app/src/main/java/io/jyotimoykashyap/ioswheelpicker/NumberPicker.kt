@@ -1,6 +1,7 @@
 package io.jyotimoykashyap.ioswheelpicker
 
 import android.content.Context
+import android.content.res.Configuration
 import android.util.TypedValue
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -42,11 +43,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -115,31 +119,17 @@ fun NumberPicker(
                     text = getItem(index),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = textStyle,
+                    style = textStyle
+                    ,
                     modifier = Modifier
                         .onSizeChanged { size -> itemHeightPixels.value = size.height }
                         .then(textModifier)
-                        .fillMaxWidth()
-                        .scale(
-                            if (state.selectedItem != getItem(index)) 1f else 1f
-                        ),
+                        .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = textAlign
                     )
             }
         }
-
-//        Divider(
-//            color = dividerColor.copy(alpha = 0.4f),
-//            modifier = Modifier.offset(y = itemHeightDp * visibleItemsMiddle + 6.dp),
-//            thickness = (0.5).dp
-//        )
-//
-//        Divider(
-//            color = dividerColor.copy(alpha = 0.4f),
-//            modifier = Modifier.offset(y = itemHeightDp * (visibleItemsMiddle + 1) - 6.dp),
-//            thickness = (0.5).dp
-//        )
 
     }
 
@@ -169,6 +159,11 @@ class PickerState {
 @Preview()
 @Composable
 fun NumberPickerPreview() {
+    val values = remember { (1..99).map { it.toString() } }
+    val valuesPickerState = rememberPickerState()
+    val units = remember { listOf("seconds", "minutes", "hours") }
+    val unitsPickerState = rememberPickerState()
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -178,12 +173,64 @@ fun NumberPickerPreview() {
                 .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp)
         ) {
+            Text(text = "Example Picker", modifier = Modifier.padding(top = 16.dp))
+            Row(modifier = Modifier.fillMaxWidth()
+                .drawBehind {
+                    drawRoundRect(
+                        color = Color.LightGray,
+                        alpha = 0.15f,
+                        topLeft = Offset(10f, 147f),
+                        size = Size(width = size.width - 20f, height = 90f),
+                        cornerRadius = CornerRadius(28f, 28f)
+                    )
+                }
+            ) {
+                NumberPicker(
+                    state = valuesPickerState,
+                    items = values,
+                    visibleItemsCount = 3,
+                    modifier = Modifier.weight(0.4f),
+                    textModifier = Modifier.padding(8.dp),
+                    textStyle = TextStyle(fontSize = 22.sp),
+                    textAlign = TextAlign.End
+                )
+                NumberPicker(
+                    state = unitsPickerState,
+                    items = units,
+                    visibleItemsCount = 3,
+                    modifier = Modifier.weight(0.6f),
+                    textModifier = Modifier.padding(8.dp),
+                    textStyle = TextStyle(fontSize = 22.sp),
+                    textAlign = TextAlign.Start
+                )
+            }
 
-            val values = remember { (1..99).map { it.toString() } }
-            val valuesPickerState = rememberPickerState()
-            val units = remember { listOf("seconds", "minutes", "hours") }
-            val unitsPickerState = rememberPickerState()
+            Text(
+                text = "Interval: ${valuesPickerState.selectedItem} ${unitsPickerState.selectedItem}",
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
 
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+fun NumberPickerPreviewNight() {
+    val values = remember { (1..99).map { it.toString() } }
+    val valuesPickerState = rememberPickerState()
+    val units = remember { listOf("seconds", "minutes", "hours") }
+    val unitsPickerState = rememberPickerState()
+
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surface)
+                .padding(16.dp)
+        ) {
             Text(text = "Example Picker", modifier = Modifier.padding(top = 16.dp))
             Row(modifier = Modifier.fillMaxWidth()
                 .drawBehind {
